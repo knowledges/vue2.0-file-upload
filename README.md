@@ -1,4 +1,4 @@
-# vue-file-upload
+# vue2-file-uploader
 
 > vue file upload and cell phone photo
 

@@ -1,14 +1,14 @@
-import FileUploadComponent from '@/components/FileUpload/'
+import FileUpload from './components/FileUpload/index.vue'
 
-const FileUpload = {
-  version: '1.0.0',
+const FileUploadComponent = {
+  version: '1.0.1',
   install: function (Vue, opt = {}) {
     if (typeof window !== 'undefined' && window.Vue) {
       Vue = window.Vue
     }
-    Vue.component(FileUploadComponent.name, FileUploadComponent)
+    Vue.component(FileUpload.name, FileUpload)
   },
-  FileUploadComponent
+  FileUpload
 }
 
-export default FileUpload
+export default FileUploadComponent

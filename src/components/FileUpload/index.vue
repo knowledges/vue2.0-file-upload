@@ -148,7 +148,7 @@
 </template>
 <script>
   export default {
-    name: 'Upload',
+    name: 'file-upload',
     components: {},
     props: {
       isDesc: {
@@ -163,7 +163,7 @@
       prefixUrl: {
         type: String,
         default: ''
-      } // 前缀 url 
+      } // 前缀 url
     },
     data() {
       return {
