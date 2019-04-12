@@ -127,7 +127,7 @@
             <div class="upload_warp_img_div_top" @click="fileDel(key)">
               <img src="./img/close.png" class="upload_warp_img_div_del" alt="关闭">
             </div>
-            <img :src="item.file.src" :class="ISPHONE ? 'upload_warp_img_phone' : 'upload_warp_img_pc'" @click="enlargeClk(item)">
+            <img :src="item.src" :class="ISPHONE ? 'upload_warp_img_phone' : 'upload_warp_img_pc'" @click="enlargeClk(item)">
           </div>
           <div v-if="imgList.length < maxLength" class="upload_warp_left" @click="fileClick()">
             <img src="./img/addimg.png" width="64" height="64" alt="添加">
@@ -154,11 +154,16 @@
       isDesc: {
         type: Boolean,
         default: true
-      },
+      }, // 是否显示下面的描述大小文字
       maxLength: {
         type: Number,
         default: 6
-      }
+      }, // 最多显示多少张图片
+      imgArray: Array, // 图片数组 子类传递
+      prefixUrl: {
+        type: String,
+        default: ''
+      } // 前缀 url 
     },
     data() {
       return {
@@ -171,7 +176,25 @@
         ISPHONE: true
       }
     },
-    watch: {},
+    watch: {
+      imgArray: {
+        handler: function (n, o) {
+          console.log(n, o)
+          if (n.length > 0) {
+            n.map((item, key) => {
+              /* 按位运算符 等同于  item.src.indexOf('http') < 0  */
+              if (!~item.src.indexOf('http')) {
+                console.log('?')
+                item.src = this.prefixUrl + item.src
+              }
+              this.size = this.size + item.fileSize
+              this.imgList.push(item)
+            })
+          }
+        },
+        immediate: true
+      }
+    },
     mounted() {
       if (!this.validatPHONE()) {
         this.ISPHONE = false
@@ -306,7 +329,7 @@
         })
       },
       fileDel(index) {
-        this.size = this.size - this.imgList[index].file.fileSize // 总大小
+        this.size = this.size - this.imgList[index].fileSize // 总大小
         this.imgList.splice(index, 1)
         this.$emit('callbackFun', this.imgList)
       },
@@ -340,7 +363,7 @@
         this.$store.commit('add')
       },
       enlargeClk(obj) {
-        this.maskSrc = obj.file.src
+        this.maskSrc = obj.src
         this.isShow = true
       },
       validatPHONE() {
