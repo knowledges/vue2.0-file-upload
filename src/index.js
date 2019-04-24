@@ -1,7 +1,7 @@
 import FileUpload from './components/FileUpload/index.vue'
 
 const FileUploadComponent = {
-  version: '1.0.1',
+  version: '1.0.4',
   install: function (Vue, opt = {}) {
     if (typeof window !== 'undefined' && window.Vue) {
       Vue = window.Vue

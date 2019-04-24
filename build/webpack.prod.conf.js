@@ -30,8 +30,8 @@ const webpackConfig = merge(baseWebpackConfig, {
   output: {
     path: config.build.assetsRoot,
     publicPath: config.build.assetsPublicPath,
-    filename: '../dist/vue2.0-File-Upload.js',
-    library: 'Vue2.0FileUpload',
+    filename: '../dist/vue2-File-Upload.js',
+    library: 'Vue2FileUpload',
     libraryTarget: 'umd' // libraryTarget会生成不同umd的代码,可以只是commonjs标准的，也可以是指amd标准的，也可以只是通过script标签引入的
   },
   plugins: [
@@ -50,7 +50,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     }),
     // extract css into its own file
     new ExtractTextPlugin({
-      filename: utils.assetsPath('css/[name].css'),
+      filename: '../dist/vue2-File-Upload.css',
       // Setting the following option to `false` will not extract CSS from codesplit chunks.
       // Their CSS will instead be inserted dynamically with style-loader when the codesplit chunk has been loaded by webpack.
       // It's currently set to `true` because we are seeing that sourcemaps are included in the codesplit bundle as well when it's `false`,
