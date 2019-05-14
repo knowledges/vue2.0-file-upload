@@ -151,6 +151,7 @@
     name: 'file-upload',
     components: {},
     props: {
+      ownerTable: String,
       isDesc: {
         type: Boolean,
         default: true
@@ -179,17 +180,23 @@
     watch: {
       imgArray: {
         handler: function (n, o) {
-          console.log(n, o)
           if (n.length > 0) {
             n.map((item, key) => {
               /* 按位运算符 等同于  item.src.indexOf('http') < 0  */
-              if (!~item.src.indexOf('http')) {
-                console.log('?')
+              if (item.src && !~item.src.indexOf('http')) {
                 item.src = this.prefixUrl + item.src
+              } else {
+                item.src = this.prefixUrl + item.fileData
               }
-              this.size = this.size + item.fileSize
+              this.size = isNaN(this.size + item.fileSize) ? 0 : this.size + item.fileSize
               this.imgList.push(item)
             })
+          } else {
+            /*
+              careful： 结合element ui form 重置【当组件中存在图片，点击重置不能将图片情况的问题】
+              2019-05-14 17:29:07
+             */
+            this.imgList = []
           }
         },
         immediate: true
@@ -277,6 +284,7 @@
         }
       },
       fileAdd(file) {
+        const { ownerTable } = this
         // 总大小
         this.size = Number(this.size) + Number(file.size)
         /* 判断是否为图片文件 注：'image/*' 已经写死了,只会是图片 */
@@ -303,6 +311,9 @@
             obj.fileExtension = fileExtension
             obj.fileName = file.name
             obj.fileSize = file.size
+            if (ownerTable !== undefined) {
+              obj.ownerTable = ownerTable
+            }
             obj.isImg = true
             obj.src = file.src
             obj.file = file

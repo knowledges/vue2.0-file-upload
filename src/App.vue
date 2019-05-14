@@ -2,9 +2,11 @@
   <div>
     <h1>附件上传</h1>
     <file-upload
-      :isDesc="true"
+      :isDesc="false"
       :maxLength="maxLength"
       :imgArray="imgArray"
+      :prefixUrl="'http://10.20.13.161/filesrv/'"
+      :owner-table="'ceshi'"
       @callbackFun="fileArrayCB"
     >
       <!--
@@ -35,21 +37,28 @@ export default {
   mounted() {
     this.$nextTick(() => {
       this.imgArray = [
+        // {
+        //   fileData: '120x60',
+        //   fileExtension: 'png',
+        //   fileName: 'delete.png',
+        //   fileSize: 3068,
+        //   isImg: true,
+        //   src: 'http://dummyimage.com/60x60'
+        // },
+        // {
+        //   fileData: '120x600',
+        //   fileExtension: 'png',
+        //   fileName: 'delete.png',
+        //   fileSize: 3068,
+        //   isImg: true,
+        //   src: 'http://dummyimage.com/120x120'
+        // },
         {
-          fileData: '120x60',
-          fileExtension: 'png',
-          fileName: 'delete.png',
-          fileSize: 3068,
-          isImg: true,
-          src: 'http://dummyimage.com/60x60'
-        },
-        {
-          fileData: '120x600',
-          fileExtension: 'png',
-          fileName: 'delete.png',
-          fileSize: 3068,
-          isImg: true,
-          src: 'http://dummyimage.com/120x120'
+          fileId: '',
+          fileName: 'timg.jpg',
+          fileType: '',
+          fileData: 'group1/M00/08/0B/ChQNolzZKeCAHee8AACCjgsBTfM991.jpg',
+          ownerTable: ''
         }
       ]
     })
