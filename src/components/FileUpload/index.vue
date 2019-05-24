@@ -112,7 +112,7 @@
 </style>
 <template>
   <div>
-    <input id="upload_file" type="file" style="display: none;" accept="image/*" name="file" @change="fileChange($event)">
+    <input :id="'upload_file' + Identification" type="file" style="display: none;" accept="image/*" name="file" @change="fileChange($event)">
     <div class="image-item space" @click="showActionSheet">
       <!-- 点击事件，弹出选择摄像头和相册的选项 -->
       <div class="image-up">
@@ -151,7 +151,8 @@
     name: 'file-upload',
     components: {},
     props: {
-      ownerTable: String,
+      Identification: Number, // 唯一标识
+      ownerTable: String, // 数据库名称
       isDesc: {
         type: Boolean,
         default: true
@@ -181,6 +182,7 @@
       imgArray: {
         handler: function (n, o) {
           if (n.length > 0) {
+            console.log(n)
             n.map((item, key) => {
               /* 按位运算符 等同于  item.src.indexOf('http') < 0  */
               if (item.src && !~item.src.indexOf('http')) {
@@ -213,7 +215,7 @@
       },
       fileClick() {
         /* eslint-disable */
-        this.$('upload_file').click()
+        this.$('upload_file' + this.Identification).click()
       },
       getImage() { // 调用手机摄像头并拍照
         /* eslint-disable */
@@ -263,7 +265,7 @@
       }, // 点击事件，弹出选择摄像头和相册的选项
       fileChange(el) {
         /* eslint-disable */
-        this.files = this.$('upload_file').files
+        this.files = this.$('upload_file' + this.Identification).files
         for (let i = 0; i < this.files.length; i++) {
           this.datas.append('file', this.files[i])
         }
