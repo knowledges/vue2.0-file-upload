@@ -1,6 +1,6 @@
 {
   "name": "vue2-file-uploader",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "vue file upload and cell phone photo",
   "main": "dist/vue2-File-Upload.js",
   "author": "woods.qiu",
