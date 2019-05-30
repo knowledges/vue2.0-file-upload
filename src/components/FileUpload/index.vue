@@ -112,7 +112,7 @@
 </style>
 <template>
   <div>
-    <input :id="'upload_file' + Identification" type="file" style="display: none;" accept="image/*" name="file" @change="fileChange($event)">
+    <input :id="'upload_file' + ident" type="file" style="display: none;" accept="image/*" name="file" @change="fileChange($event)">
     <div class="image-item space" @click="showActionSheet">
       <!-- 点击事件，弹出选择摄像头和相册的选项 -->
       <div class="image-up">
@@ -151,7 +151,7 @@
     name: 'file-upload',
     components: {},
     props: {
-      Identification: Number, // 唯一标识
+      ident: Number, // 唯一标识
       ownerTable: String, // 数据库名称
       isDesc: {
         type: Boolean,
@@ -161,11 +161,12 @@
         type: Number,
         default: 6
       }, // 最多显示多少张图片
-      imgArray: Array, // 图片数组 子类传递
       prefixUrl: {
         type: String,
         default: ''
-      } // 前缀 url
+      }, // 前缀 url
+      imgArray: Array, // 图片数组 子类传递
+      dynamicAssignment: Function // 动态赋值 只有当组件的时候用到
     },
     data() {
       return {
@@ -215,7 +216,7 @@
       },
       fileClick() {
         /* eslint-disable */
-        this.$('upload_file' + this.Identification).click()
+        this.$('upload_file' + this.ident).click()
       },
       getImage() { // 调用手机摄像头并拍照
         /* eslint-disable */
@@ -265,7 +266,7 @@
       }, // 点击事件，弹出选择摄像头和相册的选项
       fileChange(el) {
         /* eslint-disable */
-        this.files = this.$('upload_file' + this.Identification).files
+        this.files = this.$('upload_file' + this.ident).files
         for (let i = 0; i < this.files.length; i++) {
           this.datas.append('file', this.files[i])
         }
@@ -319,11 +320,13 @@
             obj.isImg = true
             obj.src = file.src
             obj.file = file
-            console.log(obj)
             this.vue.imgList.push(obj) // 移除原来前套曾
           }
         }
-        this.$emit('callbackFun', this.imgList)
+        this.$nextTick(() => {
+          this.$emit('callbackFun', this.imgList)
+          this.dynamicAssignment(this.ident, this.imgList)
+        })
       },
       folders(files) {
         var this_ = this

@@ -11,11 +11,13 @@
     >
       <!--
         附件上传 支持 android 手机 直接拍照 上传
+        ident: Number, // 唯一标识
         isDesc: 默认显示图片大小个数； boolean 类型
         maxLength 默认图片添加数 6；Number 类型
         imgArray 图片数据
         prefixUrl 图片 url 的前缀
         callbackFun 返回的数据组
+        dynamicAssignment 动态赋值 只有当组件的时候用到
        -->
     </file-upload>
   </div>
