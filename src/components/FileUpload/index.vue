@@ -79,7 +79,7 @@
     width: 100%;
     text-align: center;
   }
-  .mask img {
+  .mask img, .mask video {
     position: relative;
     max-width: 100%;
     max-height: 100%;
@@ -112,7 +112,7 @@
 </style>
 <template>
   <div>
-    <input :id="'upload_file' + ident" type="file" style="display: none;" accept="image/*" name="file" @change="fileChange($event)">
+    <input :id="'upload_file' + ident" type="file" style="display: none;" :accept="accept" name="file" @change="fileChange($event)">
     <div class="image-item space" @click="showActionSheet">
       <!-- 点击事件，弹出选择摄像头和相册的选项 -->
       <div class="image-up">
@@ -127,7 +127,15 @@
             <div class="upload_warp_img_div_top" @click="fileDel(key)">
               <img src="./img/close.png" class="upload_warp_img_div_del" alt="关闭">
             </div>
-            <img :src="item.src" :class="ISPHONE ? 'upload_warp_img_phone' : 'upload_warp_img_pc'" @click="enlargeClk(item)">
+            <template v-if="accept == 'image/*'">
+              <img :src="item.src" :class="ISPHONE ? 'upload_warp_img_phone' : 'upload_warp_img_pc'" @click="enlargeClk(item)">
+            </template>
+            <template v-else>
+              <img :id="'img' + key" :class="ISPHONE ? 'upload_warp_img_phone' : 'upload_warp_img_pc'" @click="enlargeClk(item)">
+              <video :id="'video' + key" v-show="false" :src="item.src" controls="controls" width="400" height="300">
+                不支持视频功能呢
+              </video>
+            </template>
           </div>
           <div v-if="imgList.length < maxLength" class="upload_warp_left" @click="fileClick()">
             <img src="./img/addimg.png" width="64" height="64" alt="添加">
@@ -141,7 +149,14 @@
     </div>
     <div v-if="isShow" class="mask" @click="isShow=false">
       <div class="mask_content">
-        <img :src="maskSrc" alt="">
+        <template v-if="accept == 'image/*'">
+          <img :src="maskSrc" alt="">
+        </template>
+        <template v-else>
+          <video :src="maskSrc" controls="controls" width="400" height="300">
+            不支持视频功能呢
+          </video>
+        </template>
       </div>
     </div>
   </div>
@@ -166,7 +181,12 @@
         default: ''
       }, // 前缀 url
       imgArray: Array, // 图片数组 子类传递
-      dynamicAssignment: Function // 动态赋值 只有当组件的时候用到
+      dynamicAssignment: Function, // 动态赋值 只有当组件的时候用到
+      /* image/*:接受所有的图像文件; video/*: 接受所有的视频文件; audio/*: 	接受所有的声音文件; other:MIME_type 自己百度  */
+      accept: { // 附件接受类型 默认为图片
+        type: String,
+        default: 'image/*'
+      }
     },
     data() {
       return {
@@ -183,7 +203,6 @@
       imgArray: {
         handler: function (n, o) {
           if (n.length > 0) {
-            console.log(n)
             n.map((item, key) => {
               /* 按位运算符 等同于  item.src.indexOf('http') < 0  */
               if (item.src && !~item.src.indexOf('http')) {
@@ -194,6 +213,28 @@
               this.size = isNaN(this.size + item.fileSize) ? 0 : this.size + item.fileSize
               this.imgList.push(item)
             })
+            console.log(this.accept)
+            if (this.accept === 'video/*') {
+              console.log('icom in')
+              this.$nextTick(() => {
+                const scale = 0.5
+                this.imgList.forEach((item, key) => {
+                  let video = this.$('video' + Number(key))
+                  var img = this.$('img' + Number(key))
+                  video.addEventListener('loadedmetadata', function loadedmetadata() {
+                    var canvas = document.createElement('canvas')
+                    canvas.width = video.videoWidth * scale
+                    canvas.height = video.videoHeight * scale
+                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height)
+                    img.setAttribute('crossOrigin', 'anonymous');
+                    img.src = canvas.toDataURL('image/png')
+                    console.log(img)
+                  })
+                  /* 结局问题:直接获取 videoHeight、videoWidth会得到 0 值  */
+                  /* 对视频更改来源或其他设置后要对视频元素进行更新，更改后需要重新加载 video 元素，在 video 元素加载完成后 （oncanplay），此时才能获取到正确的 videoHeight、videoWidth值 */
+                })
+              })
+            }
           } else {
             /*
               careful： 结合element ui form 重置【当组件中存在图片，点击重置不能将图片情况的问题】
@@ -291,42 +332,69 @@
         // 总大小
         this.size = Number(this.size) + Number(file.size)
         /* 判断是否为图片文件 注：'image/*' 已经写死了,只会是图片 */
-        if (file.type.indexOf('image') == -1) {
-          console.log('非图片')
-        } else {
-          /* TODO 缺少如下字段
+        /* TODO 缺少如下字段
           * fileData
-          * fileExtension: 后缀
+          * fileType: 后缀
           * fileName: 名称
           * fileSize:
           * isImg: 是否是图片
           * src
           * */
-          var reader = new FileReader()
-          reader.vue = this
-          reader.readAsDataURL(file)
-          reader.onload = function(e) {
-            file.src = this.result
-            file.idx = 0
-            var fileExtension = file.name.lastIndexOf('.') > -1 ? file.name.substring(file.name.lastIndexOf('.') + 1) : '未知类型'
-            var obj = {}
-            obj.fileData = this.result.substring(this.result.indexOf(',') + 1)
-            obj.fileExtension = fileExtension
-            obj.fileName = file.name
-            obj.fileSize = file.size
-            if (ownerTable !== undefined) {
-              obj.ownerTable = ownerTable
-            }
+        var reader = new FileReader()
+        reader.vue = this
+        reader.readAsDataURL(file)
+        reader.onload = function(e) {
+          file.src = this.result
+          file.idx = 0
+          // var fileExtension = file.name.lastIndexOf('.') > -1 ? file.name.substring(file.name.lastIndexOf('.') + 1) : '未知类型'
+          var obj = {}
+          obj.fileData = this.result.substring(this.result.indexOf(',') + 1)
+          obj.fileName = file.name
+          obj.fileSize = file.size
+          /* fileType 图片为image 视频为 video  */
+          if (this.vue.accept === 'image/*') {
+            obj.fileType = 'image'
             obj.isImg = true
-            obj.src = file.src
-            obj.file = file
-            this.vue.imgList.push(obj) // 移除原来前套曾
+          } else if (this.vue.accept === 'video/*') {
+            obj.fileType = 'video'
+            obj.isImg = false
           }
+          if (ownerTable !== undefined) {
+            obj.ownerTable = ownerTable
+          }
+          obj.src = file.src
+          obj.file = file
+          this.vue.imgList.push(obj) // 移除原来前套曾
         }
-        this.$nextTick(() => {
+
+        setTimeout(() => {
+          if (file.type.indexOf('image') == -1) {
+            console.log('非图片')
+            const scale = 0.5
+            let video = this.$('video' + Number(this.imgList.length - 1))
+            if (video !== null) {
+              var canvas = document.createElement('canvas')
+              canvas.width = video.videoWidth * scale
+              canvas.height = video.videoHeight * scale
+              canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height)
+
+              var img = this.$('img' + Number(this.imgList.length - 1))
+              img.src = canvas.toDataURL('image/png')
+            }
+          }
           this.$emit('callbackFun', this.imgList)
-          this.dynamicAssignment(this.ident, this.imgList)
-        })
+          this.dynamicAssignment && this.dynamicAssignment(this.ident, this.imgList)
+        }, 300)
+
+        // this.$nextTick(() => {
+        //   this.$emit('callbackFun', this.imgList)
+        //   this.dynamicAssignment(this.ident, this.imgList)
+        // })
+
+        // if (file.type.indexOf('image') == -1) {
+        //   console.log('非图片')
+        // } else {
+        // }
       },
       folders(files) {
         var this_ = this
