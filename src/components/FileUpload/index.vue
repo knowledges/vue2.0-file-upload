@@ -221,14 +221,24 @@
                 this.imgList.forEach((item, key) => {
                   let video = this.$('video' + Number(key))
                   var img = this.$('img' + Number(key))
-                  video.addEventListener('loadedmetadata', function loadedmetadata() {
-                    var canvas = document.createElement('canvas')
-                    canvas.width = video.videoWidth * scale
-                    canvas.height = video.videoHeight * scale
-                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height)
-                    img.setAttribute('crossOrigin', 'anonymous');
-                    img.src = canvas.toDataURL('image/png')
-                    console.log(img)
+                  video.addEventListener('canplaythrough', function loadedmetadata() {
+                    console.log('视频加载完成！')
+                    setTimeout(() => {
+                      var canvas = document.createElement('canvas')
+                      canvas.width = video.videoWidth * scale
+                      canvas.height = video.videoHeight * scale
+
+                      img.setAttribute('crossOrigin', '*')
+
+                      canvas
+                        .getContext('2d')
+                        .drawImage(video, 0, 0, canvas.width, canvas.height)
+
+                      const base64 = canvas.toDataURL('image/png')
+
+                      img.src = base64
+
+                    }, 1000)
                   })
                   /* 结局问题:直接获取 videoHeight、videoWidth会得到 0 值  */
                   /* 对视频更改来源或其他设置后要对视频元素进行更新，更改后需要重新加载 video 元素，在 video 元素加载完成后 （oncanplay），此时才能获取到正确的 videoHeight、videoWidth值 */
@@ -366,7 +376,6 @@
           obj.file = file
           this.vue.imgList.push(obj) // 移除原来前套曾
         }
-
         setTimeout(() => {
           if (file.type.indexOf('image') == -1) {
             console.log('非图片')
@@ -376,8 +385,8 @@
               var canvas = document.createElement('canvas')
               canvas.width = video.videoWidth * scale
               canvas.height = video.videoHeight * scale
+              console.log(canvas.width, canvas.height)
               canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height)
-
               var img = this.$('img' + Number(this.imgList.length - 1))
               img.src = canvas.toDataURL('image/png')
             }
@@ -385,12 +394,10 @@
           this.$emit('callbackFun', this.imgList)
           this.dynamicAssignment && this.dynamicAssignment(this.ident, this.imgList)
         }, 300)
-
         // this.$nextTick(() => {
         //   this.$emit('callbackFun', this.imgList)
         //   this.dynamicAssignment(this.ident, this.imgList)
         // })
-
         // if (file.type.indexOf('image') == -1) {
         //   console.log('非图片')
         // } else {
